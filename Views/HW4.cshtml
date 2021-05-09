@@ -1,0 +1,198 @@
+﻿@using ISIT420_HW4_Tarasiuk_Gurskaia.Models
+@using ISIT420_HW4_Tarasiuk_Gurskaia.Services
+@model SalesPerson
+
+
+@{
+    DataService service = new DataService();
+    List<CD> allCD = service.GetAllCD();
+    List<SalesPerson> allSalesPerson = service.GetAllSalesPerson();
+    List<Store> allStores = service.GetAllStores();
+
+    List<SelectListItem> firstList = new List<SelectListItem>();
+    for (int i = 0; i < allSalesPerson.Count; i++)
+    {
+        firstList.Add(new SelectListItem() { Text = $"{allSalesPerson[i].FirstName} {allSalesPerson[i].LastName}", Value = $"{i}" });
+    }
+
+    List<SelectListItem> secondList = new List<SelectListItem>();
+    for (int i = 0; i < allStores.Count; i++)
+    {
+        secondList.Add(new SelectListItem() { Text = $"{allStores[i].City}", Value = $"{i}" });
+    }
+
+    Dictionary<Store, int> cities = new Dictionary<Store, int>();
+    for (int i = 0; i < allStores.Count; i++)
+    {
+        cities.Add(allStores[i], 0);
+    }
+
+    for (int i = 0; i < allSalesPerson.Count; i++)
+    {
+        for (int j = 0; j < allStores.Count; j++)
+        {
+            if (allStores[j].ID == allSalesPerson[i].StoreID)
+            {
+                cities[allStores[j]]++;
+            }
+        }
+    }
+
+    List<string> thirdList = new List<string>();
+
+    foreach (Store store in cities.Keys)
+    {
+        thirdList.Add(store.City + ": ");
+    }
+    int idx = 0;
+    foreach (int a in cities.Values)
+    {
+        thirdList[idx] += a;
+        idx++;
+    }
+
+
+}
+
+
+@helper CreateList(List<string> cities)
+{
+    <ul>
+        @for (int i = 0; i < cities.Count; i++)
+        {
+            <li>@cities[i]</li>
+        }
+    </ul>
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title -  Main</title>
+</head>
+<body>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        function find() {
+            console.log("HI HEREEFSF");
+            @*var id = $('#NoteId').val();*@
+            var id = 1;
+            $.getJSON('api/values/' + id)
+                .done(function (data) {
+                    console.log("IN CITY DATA:", data);
+                    $.each(data, function (key, item) {
+                        // Add a list item for the product.
+                        console.log("CITY:", item);
+                        var newRes = item;
+                        $('<li>', { text: newRes }).appendTo($('#city1'));
+                    });
+                    @*$('#city1').text(data);*@
+                })
+                .fail(function (jqXHR, textStatus, err) {
+                    console.log("IN CITY DATA FAIL");
+                    $('#city1').text('Error: ' + err);
+                });
+        }
+    </script>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        function get_person_sold() {
+            console.log("HI HEREEFSF");
+            @*var id = $('#NoteId').val();*@
+            var id = 2;
+            $.getJSON('api/values/' + id)
+                .done(function (data) {
+                    console.log("IN PERSON DATA:", data);
+                    $.each(data, function (key, item) {
+                        // Add a list item for the product.
+                        console.log("PERSON:", item);
+                        var newCity = item;
+                        $('<p>', { text: newCity }).appendTo($('#get_person_sold1'));
+                    });
+                    @*$('#city1').text(data);*@
+                })
+                .fail(function (jqXHR, textStatus, err) {
+                    console.log("IN CITY DATA FAIL");
+                    $('#get_person_sold1').text('Error: ' + err);
+                });
+        }
+    </script>
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        function get_city_sold() {
+            console.log("HI HEREEFSF");
+            @*var id = $('#NoteId').val();*@
+            var id = 3;
+            $.getJSON('api/values/' + id)
+                .done(function (data) {
+                    console.log("IN PERSON DATA:", data);
+                    $.each(data, function (key, item) {
+                        // Add a list item for the product.
+                        console.log("PERSON:", item);
+                        var newCity = item;
+                        $('<p>', { text: newCity }).appendTo($('#get_city_sold1'));
+                    });
+                    @*$('#city1').text(data);*@
+                })
+                .fail(function (jqXHR, textStatus, err) {
+                    console.log("IN CITY DATA FAIL");
+                    $('#get_city_sold1').text('Error: ' + err);
+                });
+        }
+    </script>
+
+    <h1>Which stores are selling CDs for better markups? ( $13+ )</h1>
+    <h2> Here are the total number of sales per store of CD's sold at more than $13</h2>
+    <button type="button" name="firstButton" value="1" onclick="find()">Get Markups</button>
+    @*@CreateList(thirdList)*@
+    <p id="city1" />
+
+    <h1> I want to check on the performance of an employee</h1>
+    <h2> Will show the total ammount sold for a salesperson for the entire year</h2>
+    @Html.DropDownList("Choose an employee", firstList, $"Select User")
+    <button type="button" onclick="get_person_sold()"> Get empl </button>
+    <p id="get_person_sold1" />
+
+    @*<p> Chose an employee</p>
+        <select>
+            <option>test</option>
+            <option>test2</option>
+        </select>*@
+
+    @*@Html.DropDownListFor(s => s., new SelectList(ViewBag.Data, "ID", "FirstName"))*@
+
+    <h1> I want to see the performance of the stores</h1>
+    <p> Chose the store</p>
+    @Html.DropDownList("Choose the store", secondList, $"Select City")
+    <button onclick="get_city_sold()"> Get City </button>
+    <p id="get_city_sold1" />
+
+    @*@Html.DropDownListFor(model => model.SeletedValue, , "Select", new { id = "ddlStores" })*@
+    @*<select id="DropDownStore">
+            <option>test</option>
+            <option>test2</option>
+        </select>*@
+
+
+
+
+
+    @*formaction='@Url.Action("Action", "Controller")*@
+
+
+
+
+
+    <div class="container body-content" hidden="hidden">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+</body>
+</html>
